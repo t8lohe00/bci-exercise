@@ -10,7 +10,6 @@ info:
     Lohikoski Heikki TVT19KMO
 servers:
   - url: 'http://localhost:3000'
-  - description: ''
 paths:
   /users:
     post:
