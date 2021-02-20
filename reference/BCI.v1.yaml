@@ -1,0 +1,378 @@
+openapi: 3.0.0
+info:
+  title: BCI
+  version: '1.0'
+  contact:
+    name: Heikki Lohikoski
+    email: t8lohe00@students.oamk.fi
+  description: |-
+    Building Cloud Integration
+    Lohikoski Heikki TVT19KMO
+servers:
+  - url: 'http://localhost:3000'
+  - description: ''
+paths:
+  /users:
+    post:
+      summary: Register a user
+      operationId: registerUser
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+      description: 'Register a new user. '
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: ''
+    parameters: []
+  /users/login:
+    get:
+      summary: Authenticate a user to the API
+      tags: []
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Java Web Token for authentication
+                  idUser:
+                    type: integer
+                    description: idUser of the logged in user
+              examples:
+                example-1:
+                  value:
+                    token: string
+                    idUser: 0
+          headers: {}
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+      operationId: login
+      description: Get authentication token from server
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: HTTP Basic authentication
+          required: true
+    parameters: []
+  '/users/{idUser}':
+    parameters:
+      - schema:
+          type: string
+        name: idUser
+        in: path
+        required: true
+        description: idUser of a user
+    get:
+      summary: Show user information
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+      operationId: userInfo
+      description: Get the information of a specific user
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Bearer token
+          required: true
+  '/users/{idUser}/items':
+    parameters:
+      - schema:
+          type: string
+        name: idUser
+        in: path
+        required: true
+        description: idUser of the user which items are fetched
+    get:
+      summary: Show a users posted items
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+      operationId: userItems
+      description: List all postings of a user identified by idUser
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Bearer token
+          required: true
+  '/users/{idUser}/items/{idItem}':
+    parameters:
+      - schema:
+          type: string
+        name: idUser
+        in: path
+        required: true
+        description: idUser of the user
+      - schema:
+          type: string
+        name: idItem
+        in: path
+        required: true
+        description: idItem of the user's item
+    put:
+      summary: Modify an item information
+      operationId: modifyItem
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+      description: Update the information
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Bearer token
+          required: true
+    delete:
+      summary: ''
+      operationId: deleteItem
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Authorization
+          description: Bearer token
+      description: Delete an item posted by logged in user
+  /items:
+    get:
+      summary: List items for sale
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+      operationId: listItems
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: category
+          description: List items of category only
+        - schema:
+            type: string
+          in: query
+          name: location
+          description: List items by location
+        - schema:
+            type: integer
+          in: query
+          name: date
+          description: List items posted on date (UNIX epoch)
+      description: List items
+    parameters: []
+components:
+  schemas:
+    User:
+      title: User
+      type: object
+      x-examples:
+        example-1 (password Password696969):
+          idUser: 0
+          firstName: Aku
+          lastName: Ankka
+          email: aku.ankka@disney.com
+          dateCreated: 1613413844
+          dateModified: 1613413844
+          tel: '+35881234567'
+          password: $2y$10$9nlCG7OwYW9QqE5/Ofd/UeUvvIvArY22BjM7SphFuaXhJ4QYw42je
+      description: User of BCI
+      properties:
+        idUser:
+          type: integer
+          description: 'The unique identifier of the user, automatically generated'
+        firstName:
+          type: string
+          description: First name of the user
+        lastName:
+          type: string
+          description: Last name of the user
+        email:
+          type: string
+          description: Email address of the user
+        dateCreated:
+          type: integer
+          description: 'Creation date of the user (UNIX epoch, automatically generated)'
+        dateModified:
+          type: integer
+          description: 'The date of last modification of the user (UNIX epoch, automatically updated)'
+        tel:
+          type: string
+          description: 'Telephone number of the user (optional, may contain country codes e.g. +358101234567)'
+        password:
+          type: string
+          description: password of the user (hash)
+      required:
+        - email
+    Item:
+      title: Item
+      type: object
+      description: Item for sale
+      properties:
+        idItem:
+          type: integer
+          description: 'The unique identifier of the item, automatically generated'
+        title:
+          type: string
+          description: The title of the item for sale
+        description:
+          type: string
+          description: The description of the item
+        category:
+          type: string
+          description: 'Category of the item for sale (cars, clothing, electronics etc.)'
+        location:
+          type: string
+          description: 'The location of the item (city, country etc)'
+        askingPrice:
+          type: number
+          description: The asking price of the item
+        datePosted:
+          type: integer
+          description: Date the item was first posted (UNIX epoch)
+        dateModified:
+          type: integer
+          description: The date the item was last modified (UNIX epoch)
+        canShip:
+          type: boolean
+          description: Whether the seller is willing to ship the item
+        idUser:
+          type: integer
+      x-examples:
+        example-1:
+          idItem: 0
+          title: 'Ford Fiesta, nice'
+          description: Ford Fiesta 1979
+          category: Cars
+          location: Turku
+          askingPrice: 400
+          datePosted: 1613592071
+          dateModified: 1613592071
+          canShip: false
+          idUser: 1
+    Status:
+      title: Status
+      type: object
+      description: A status message with more details about success or failure of a request
+      x-examples:
+        example-1:
+          status: 404
+          message: Not Found
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
